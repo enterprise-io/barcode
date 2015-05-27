@@ -34,9 +34,9 @@
  *    FPDF
  */
 
-namespace JBDemonte;
+namespace FCiacchi;
 
-use JBDemonte\Barcodes as Barcodes;
+use FCiacchi\Barcodes as Barcodes;
 
 class Barcode {
 

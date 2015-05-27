@@ -1,5 +1,5 @@
 <?php
-namespace JBDemonte\Barcodes;
+namespace FCiacchi\Barcodes;
 
 class BarcodeI25 {
     static private $encoding = array('NNWWN', 'WNNNW', 'NWNNW', 'WWNNN', 'NNWNW', 'WNWNN', 'NWWNN', 'NNNWW', 'WNNWN','NWNWN');

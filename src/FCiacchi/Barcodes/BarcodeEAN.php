@@ -1,5 +1,5 @@
 <?php
-namespace JBDemonte\Barcodes;
+namespace FCiacchi\Barcodes;
 
   class BarcodeEAN {
     static private $encoding = array( 
