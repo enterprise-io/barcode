@@ -1,5 +1,5 @@
 {
-    "name": "jbdemonte/barcode",
+    "name": "fciacchi/barcode",
     "description": "BarCode Coder Library (BCC Library), GD and FPDF compatible",
 	"keywords": ["barcode","gd", "fpdf"],
     "homepage": "http://barcode-coder.com/en/",
@@ -19,7 +19,7 @@
 	},
 	"autoload": {
 		"psr-0": {
-			"JBDemonte": "src/"
+			"FCiacchi": "src/"
 		}
 	}
 }

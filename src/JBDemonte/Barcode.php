@@ -44,6 +44,10 @@ class Barcode {
         return self::_draw(__FUNCTION__, $res, $color, $x, $y, $angle, $type, $datas, $width, $height);
     }
 
+    static public function fpdf($res, $color, $x, $y, $angle, $type, $datas, $width = null, $height = null){
+        return self::_draw(__FUNCTION__, $res, $color, $x, $y, $angle, $type, $datas, $width, $height);
+    }
+
     static private function _draw($call, $res, $color, $x, $y, $angle, $type, $datas, $width, $height){
         $digit = '';
         $hri   = '';
@@ -128,20 +132,12 @@ class Barcode {
         return $result;
     }
 
+    // convert a bit string to an array of array of bit char
     private static function bitStringTo2DArray( $digit ){
         $d = array();
         $len = strlen($digit);
         for($i=0; $i<$len; $i++) $d[$i] = $digit[$i];
         return(array($d));
-    }
-
-    // convert a bit string to an array of array of bit char
-
-    private static function digitToGDRenderer($gd, $color, $xi, $yi, $angle, $mw, $mh, $digit){
-        $fn = function($points) use ($gd, $color) {
-            imagefilledpolygon($gd, $points, 4, $color);
-        };
-        return self::digitToRenderer($fn, $xi, $yi, $angle, $mw, $mh, $digit);
     }
 
     private static function digitToRenderer($fn, $xi, $yi, $angle, $mw, $mh, $digit){
@@ -185,12 +181,38 @@ class Barcode {
     }
 
     // GD barcode renderer
-
-    static private function _rotate($x1, $y1, $cos, $sin , &$x, &$y){
-        $x = $x1 * $cos - $y1 * $sin;
-        $y = $x1 * $sin + $y1 * $cos;
+    private static function digitToGDRenderer($gd, $color, $xi, $yi, $angle, $mw, $mh, $digit){
+        $fn = function($points) use ($gd, $color) {
+            imagefilledpolygon($gd, $points, 4, $color);
+        };
+        return self::digitToRenderer($fn, $xi, $yi, $angle, $mw, $mh, $digit);
     }
     // FPDF barcode renderer
+    private static function digitToFPDFRenderer($pdf, $color, $xi, $yi, $angle, $mw, $mh, $digit){
+        if (!is_array($color)){
+            if (preg_match('`([0-9A-F]{2})([0-9A-F]{2})([0-9A-F]{2})`i', $color, $m)){
+                $color = array(hexdec($m[1]),hexdec($m[2]),hexdec($m[3]));
+            } else {
+                $color = array(0,0,0);
+            }
+        }
+        $color = array_values($color);
+        $pdf->SetDrawColor($color[0],$color[1],$color[2]);
+        $pdf->SetFillColor($color[0],$color[1],$color[2]);
+
+        $fn = function($points) use ($pdf) {
+            $op = 'f';
+            $h = $pdf->h;
+            $k = $pdf->k;
+            $points_string = '';
+            for($i=0; $i < 8; $i+=2){
+                $points_string .= sprintf('%.2F %.2F', $points[$i]*$k, ($h-$points[$i+1])*$k);
+                $points_string .= $i ? ' l ' : ' m ';
+            }
+            $pdf->_out($points_string . $op);
+        };
+        return self::digitToRenderer($fn, $xi, $yi, $angle, $mw, $mh, $digit);
+    }
 
     static private function result($xi, $yi, $columns, $lines, $mw, $mh, $cos, $sin){
         self::_rotate(0, 0, $cos, $sin , $x1, $y1);
@@ -220,34 +242,9 @@ class Barcode {
         );
     }
 
-    private static function digitToFPDFRenderer($pdf, $color, $xi, $yi, $angle, $mw, $mh, $digit){
-        if (!is_array($color)){
-            if (preg_match('`([0-9A-F]{2})([0-9A-F]{2})([0-9A-F]{2})`i', $color, $m)){
-                $color = array(hexdec($m[1]),hexdec($m[2]),hexdec($m[3]));
-            } else {
-                $color = array(0,0,0);
-            }
-        }
-        $color = array_values($color);
-        $pdf->SetDrawColor($color[0],$color[1],$color[2]);
-        $pdf->SetFillColor($color[0],$color[1],$color[2]);
-
-        $fn = function($points) use ($pdf) {
-            $op = 'f';
-            $h = $pdf->h;
-            $k = $pdf->k;
-            $points_string = '';
-            for($i=0; $i < 8; $i+=2){
-                $points_string .= sprintf('%.2F %.2F', $points[$i]*$k, ($h-$points[$i+1])*$k);
-                $points_string .= $i ? ' l ' : ' m ';
-            }
-            $pdf->_out($points_string . $op);
-        };
-        return self::digitToRenderer($fn, $xi, $yi, $angle, $mw, $mh, $digit);
-    }
-
-    static public function fpdf($res, $color, $x, $y, $angle, $type, $datas, $width = null, $height = null){
-        return self::_draw(__FUNCTION__, $res, $color, $x, $y, $angle, $type, $datas, $width, $height);
+    static private function _rotate($x1, $y1, $cos, $sin , &$x, &$y){
+        $x = $x1 * $cos - $y1 * $sin;
+        $y = $x1 * $sin + $y1 * $cos;
     }
 
     static public function rotate($x1, $y1, $angle , &$x, &$y){
