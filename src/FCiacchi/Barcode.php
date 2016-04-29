@@ -48,7 +48,7 @@ class Barcode {
         return self::_draw(__FUNCTION__, $res, $color, $x, $y, $angle, $type, $datas, $width, $height);
     }
 
-    static private function _draw($call, $res, $color, $x, $y, $angle, $type, $datas, $width, $height){
+    static protected function _draw($call, $res, $color, $x, $y, $angle, $type, $datas, $width, $height){
         $digit = '';
         $hri   = '';
         $code  = '';
@@ -133,14 +133,14 @@ class Barcode {
     }
 
     // convert a bit string to an array of array of bit char
-    private static function bitStringTo2DArray( $digit ){
+    protected static function bitStringTo2DArray( $digit ){
         $d = array();
         $len = strlen($digit);
         for($i=0; $i<$len; $i++) $d[$i] = $digit[$i];
         return(array($d));
     }
 
-    private static function digitToRenderer($fn, $xi, $yi, $angle, $mw, $mh, $digit){
+    protected static function digitToRenderer($fn, $xi, $yi, $angle, $mw, $mh, $digit){
         $lines = count($digit);
         $columns = count($digit[0]);
         $angle = deg2rad(-$angle);
@@ -181,14 +181,14 @@ class Barcode {
     }
 
     // GD barcode renderer
-    private static function digitToGDRenderer($gd, $color, $xi, $yi, $angle, $mw, $mh, $digit){
+    protected static function digitToGDRenderer($gd, $color, $xi, $yi, $angle, $mw, $mh, $digit){
         $fn = function($points) use ($gd, $color) {
             imagefilledpolygon($gd, $points, 4, $color);
         };
         return self::digitToRenderer($fn, $xi, $yi, $angle, $mw, $mh, $digit);
     }
     // FPDF barcode renderer
-    private static function digitToFPDFRenderer($pdf, $color, $xi, $yi, $angle, $mw, $mh, $digit){
+    protected static function digitToFPDFRenderer($pdf, $color, $xi, $yi, $angle, $mw, $mh, $digit){
         if (!is_array($color)){
             if (preg_match('`([0-9A-F]{2})([0-9A-F]{2})([0-9A-F]{2})`i', $color, $m)){
                 $color = array(hexdec($m[1]),hexdec($m[2]),hexdec($m[3]));
@@ -214,7 +214,7 @@ class Barcode {
         return self::digitToRenderer($fn, $xi, $yi, $angle, $mw, $mh, $digit);
     }
 
-    static private function result($xi, $yi, $columns, $lines, $mw, $mh, $cos, $sin){
+    static protected function result($xi, $yi, $columns, $lines, $mw, $mh, $cos, $sin){
         self::_rotate(0, 0, $cos, $sin , $x1, $y1);
         self::_rotate($columns * $mw, 0, $cos, $sin , $x2, $y2);
         self::_rotate($columns * $mw, $lines * $mh, $cos, $sin , $x3, $y3);
@@ -242,7 +242,7 @@ class Barcode {
         );
     }
 
-    static private function _rotate($x1, $y1, $cos, $sin , &$x, &$y){
+    static protected function _rotate($x1, $y1, $cos, $sin , &$x, &$y){
         $x = $x1 * $cos - $y1 * $sin;
         $y = $x1 * $sin + $y1 * $cos;
     }
